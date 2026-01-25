@@ -1,4 +1,4 @@
-import type { Workflow, WorkflowRun } from './types';
+import type { Workflow } from './types';
 
 const GITHUB_API = 'https://api.github.com';
 
@@ -26,23 +26,6 @@ export const fetchWorkflows = async (
   
   const data = await response.json();
   return data.workflows || [];
-};
-
-export const fetchWorkflowRuns = async (
-  owner: string,
-  repo: string,
-  workflowId: number,
-  token?: string
-): Promise<WorkflowRun[]> => {
-  const url = `${GITHUB_API}/repos/${owner}/${repo}/actions/workflows/${workflowId}/runs`;
-  const response = await fetch(url, { headers: getHeaders(token) });
-  
-  if (!response.ok) {
-    throw new Error(`Failed to fetch workflow runs: ${response.statusText}`);
-  }
-  
-  const data = await response.json();
-  return data.workflow_runs || [];
 };
 
 export const triggerWorkflow = async (

@@ -5,8 +5,8 @@ interface FilterBarProps {
 
 export function FilterBar({ selectedStatus, onStatusChange }: FilterBarProps) {
     return (
-        <div className="mb-4 flex gap-2">
-            <span className="label-text flex items-center font-semibold">Filter by:</span>
+        <div className="mb-4 flex gap-2 items-center">
+            <span className="label-text flex items-center font-semibold text-base-content">Filter by:</span>
             <select
                 className="select select-bordered select-sm"
                 value={selectedStatus}

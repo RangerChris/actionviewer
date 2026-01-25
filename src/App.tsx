@@ -118,11 +118,17 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen py-8">
+    <div className="min-h-screen py-8 bg-base-100">
       <div className="container mx-auto px-4">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2">GitHub Actions Viewer</h1>
+          {repoOwner && repoName ? (
+            <h1 className="text-4xl font-bold mb-2 text-base-content">
+              {repoOwner}/{repoName} - Workflows
+            </h1>
+          ) : (
+            <h1 className="text-4xl font-bold mb-2 text-base-content">GitHub Actions Viewer</h1>
+          )}
           <p className="text-base-content/70">
             Search and trigger workflows from any repository
           </p>

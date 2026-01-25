@@ -19,9 +19,9 @@ export function RepositoryInput({ onSubmit, loading }: RepositoryInputProps) {
     };
 
     return (
-        <form onSubmit={handleSubmit} className="card bg-base-200 shadow-lg mb-6">
+        <form onSubmit={handleSubmit} className="card bg-base-300 shadow-lg mb-6">
             <div className="card-body">
-                <h2 className="card-title mb-4">Add Repository</h2>
+                <h2 className="card-title mb-4 text-base-content">Add Repository</h2>
 
                 <div className="grid grid-cols-2 gap-4 mb-4">
                     <div>
@@ -31,7 +31,7 @@ export function RepositoryInput({ onSubmit, loading }: RepositoryInputProps) {
                         <input
                             type="text"
                             placeholder="github-username"
-                            className="input input-bordered w-full"
+                            className="input input-bordered w-full bg-base-100 text-base-content"
                             value={owner}
                             onChange={(e) => setOwner(e.target.value)}
                             disabled={loading}
@@ -44,7 +44,7 @@ export function RepositoryInput({ onSubmit, loading }: RepositoryInputProps) {
                         <input
                             type="text"
                             placeholder="repo-name"
-                            className="input input-bordered w-full"
+                            className="input input-bordered w-full bg-base-100 text-base-content"
                             value={repo}
                             onChange={(e) => setRepo(e.target.value)}
                             disabled={loading}
@@ -60,14 +60,14 @@ export function RepositoryInput({ onSubmit, loading }: RepositoryInputProps) {
                         <input
                             type={showToken ? 'text' : 'password'}
                             placeholder="ghp_xxxxxxxxxxxx"
-                            className="input input-bordered w-full flex-1"
+                            className="input input-bordered w-full flex-1 bg-base-100 text-base-content"
                             value={token}
                             onChange={(e) => setToken(e.target.value)}
                             disabled={loading}
                         />
                         <button
                             type="button"
-                            className="btn btn-outline"
+                            className="btn btn-primary"
                             onClick={() => setShowToken(!showToken)}
                             disabled={loading}
                         >

@@ -34,8 +34,8 @@ export function TriggerModal({
 
     return (
         <div className="modal modal-open">
-            <div className="modal-box w-full max-w-md" role="dialog">
-                <h3 className="font-bold text-lg mb-4">Trigger: {workflowName}</h3>
+            <div className="modal-box w-full max-w-md bg-base-100 text-base-content" role="dialog">
+                <h3 className="font-bold text-lg mb-4 text-base-content">Trigger: {workflowName}</h3>
 
                 <div className="form-control mb-4">
                     <label className="label">
@@ -44,7 +44,7 @@ export function TriggerModal({
                     <input
                         type="text"
                         placeholder="main"
-                        className="input input-bordered"
+                        className="input input-bordered bg-base-100 text-base-content"
                         value={branch}
                         onChange={(e) => setBranch(e.target.value)}
                         disabled={loading}
@@ -53,7 +53,7 @@ export function TriggerModal({
 
                 <div className="modal-action">
                     <button
-                        className="btn"
+                        className="btn btn-primary"
                         onClick={onCancel}
                         disabled={loading}
                     >

@@ -118,7 +118,7 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-base-200 py-8">
+    <div className="min-h-screen py-8">
       <div className="container mx-auto px-4">
         {/* Header */}
         <div className="mb-8">
@@ -152,7 +152,7 @@ function App() {
             </svg>
             <span>{error}</span>
             <button
-              className="btn btn-sm"
+              className="btn btn-primary btn-sm"
               onClick={() => setError(null)}
             >
               Close
@@ -162,7 +162,7 @@ function App() {
 
         {/* Workflows Section */}
         {repoOwner && repoName && (
-          <div className="bg-white rounded-lg p-6 shadow-md">
+          <div className="bg-base-100 rounded-lg p-6 shadow-md">
             <div className="mb-6">
               <h2 className="text-2xl font-bold mb-4">
                 {repoOwner}/{repoName} - Workflows

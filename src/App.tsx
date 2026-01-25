@@ -8,6 +8,11 @@ import {
 } from './components';
 import { fetchWorkflows, triggerWorkflow } from './api';
 import type { Workflow } from './types';
+import {
+  saveRepositoryData,
+  loadRepositoryData,
+  saveWorkflowInputs,
+} from './storage';
 import './App.css';
 
 function App() {
@@ -26,6 +31,16 @@ function App() {
     workflowName: '',
   });
   const [triggerLoading, setTriggerLoading] = useState(false);
+
+  // Load saved repository data on mount
+  useEffect(() => {
+    const savedData = loadRepositoryData();
+    if (savedData) {
+      setRepoOwner(savedData.owner);
+      setRepoName(savedData.repo);
+      setToken(savedData.token || '');
+    }
+  }, []);
 
   // Filter workflows based on search and status
   useEffect(() => {
@@ -62,6 +77,13 @@ function App() {
     setRepoName(repo);
     setToken(loadToken || '');
 
+    // Save repository data to local storage
+    saveRepositoryData({
+      owner,
+      repo,
+      token: loadToken,
+    });
+
     try {
       const data = await fetchWorkflows(owner, repo, loadToken);
       setWorkflows(data);
@@ -88,6 +110,9 @@ function App() {
   const handleConfirmTrigger = async (inputs: Record<string, string>) => {
     setTriggerLoading(true);
     try {
+      // Save workflow inputs to local storage
+      saveWorkflowInputs(triggerModal.workflowName, inputs);
+
       await triggerWorkflow(
         repoOwner,
         repoName,

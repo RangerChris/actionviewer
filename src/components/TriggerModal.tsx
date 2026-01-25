@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { loadWorkflowInputs } from '../storage';
 
 interface TriggerModalProps {
     isOpen: boolean;
@@ -19,11 +20,18 @@ export function TriggerModal({
     const [branch, setBranch] = useState('main');
 
     useEffect(() => {
-        if (!isOpen) {
+        if (isOpen) {
+            // Try to load previously saved inputs for the same workflow
+            const savedInputs = loadWorkflowInputs();
+            if (savedInputs && savedInputs.workflowName === workflowName) {
+                setInputs(savedInputs.inputs);
+                setBranch(savedInputs.inputs['ref'] || 'main');
+            }
+        } else {
             setInputs({});
             setBranch('main');
         }
-    }, [isOpen]);
+    }, [isOpen, workflowName]);
 
     const handleSubmit = () => {
         const allInputs = { ref: branch, ...inputs };

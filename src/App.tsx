@@ -13,7 +13,6 @@ import {
   loadRepositoryData,
   saveWorkflowInputs,
 } from './storage';
-import './App.css';
 
 function App() {
   const [repoOwner, setRepoOwner] = useState('');

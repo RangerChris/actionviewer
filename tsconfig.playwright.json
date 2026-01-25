@@ -1,0 +1,15 @@
+{
+    "extends": "./tsconfig.app.json",
+    "compilerOptions": {
+        "composite": true,
+        "noEmit": true,
+        "types": [
+            "@playwright/test"
+        ],
+        "forceConsistentCasingInFileNames": true,
+        "outDir": "./node_modules/.tmp/tsconfig.playwright"
+    },
+    "include": [
+        "tests/**/*.*"
+    ]
+}

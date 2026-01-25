@@ -7,14 +7,18 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:e2e": "playwright test",
+    "test:e2e:coverage": "playwright test --reporter=list"
   },
   "dependencies": {
     "react": "^19.2.3",
     "react-dom": "^19.2.3"
   },
   "devDependencies": {
+    "@bgotink/playwright-coverage": "^0.3.2",
     "@eslint/js": "^9.39.2",
+    "@playwright/test": "^1.50.1",
     "@tailwindcss/vite": "^4.1.18",
     "@types/node": "^25.0.10",
     "@types/react": "^19.2.9",

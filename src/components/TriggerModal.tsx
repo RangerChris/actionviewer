@@ -34,7 +34,7 @@ export function TriggerModal({
 
     return (
         <div className="modal modal-open">
-            <div className="modal-box w-full max-w-md">
+            <div className="modal-box w-full max-w-md" role="dialog">
                 <h3 className="font-bold text-lg mb-4">Trigger: {workflowName}</h3>
 
                 <div className="form-control mb-4">

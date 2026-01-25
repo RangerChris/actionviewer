@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { loadRepositoryData, saveRepositoryData } from '../storage';
 
 interface RepositoryInputProps {
     onSubmit: (owner: string, repo: string, token?: string) => void;
@@ -11,9 +12,21 @@ export function RepositoryInput({ onSubmit, loading }: RepositoryInputProps) {
     const [token, setToken] = useState('');
     const [showToken, setShowToken] = useState(false);
 
+    // Load saved repository data on mount
+    useEffect(() => {
+        const savedData = loadRepositoryData();
+        if (savedData) {
+            setOwner(savedData.owner);
+            setRepo(savedData.repo);
+            setToken(savedData.token || '');
+        }
+    }, []);
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (owner && repo) {
+            // Save to local storage when submitting
+            saveRepositoryData({ owner, repo, token: token || undefined });
             onSubmit(owner, repo, token || undefined);
         }
     };

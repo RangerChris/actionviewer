@@ -1,19 +1,31 @@
 /**
  * GitHub OAuth configuration and utilities
  * 
- * Setup instructions:
+ * Setup instructions for github.com:
  * 1. Go to https://github.com/settings/developers
  * 2. Create a new OAuth App
  * 3. Set Authorization callback URL to: http://localhost:5173/callback
- * 4. Copy the Client ID and set it below
+ * 4. Copy the Client ID and set VITE_GITHUB_CLIENT_ID
+ * 
+ * For GitHub Enterprise, also set:
+ * - VITE_GITHUB_DOMAIN=your-enterprise.com (without https://)
  */
+
+// GitHub domain - defaults to github.com, can be set to enterprise domain
+const GITHUB_DOMAIN = import.meta.env.VITE_GITHUB_DOMAIN || 'github.com';
 
 // Replace with your GitHub OAuth App Client ID
 export const GITHUB_CLIENT_ID = import.meta.env.VITE_GITHUB_CLIENT_ID || 'YOUR_CLIENT_ID_HERE';
 
 export const GITHUB_REDIRECT_URI = `${window.location.origin}/callback`;
 
-export const GITHUB_OAUTH_AUTHORIZE_URL = 'https://github.com/login/oauth/authorize';
+// Build API URL based on domain (github.com uses api.github.com, enterprise uses domain/api/v3)
+const getGitHubApiUrl = () => {
+  return GITHUB_DOMAIN === 'github.com' ? 'https://api.github.com' : `https://${GITHUB_DOMAIN}/api/v3`;
+};
+
+export const GITHUB_API_URL = getGitHubApiUrl();
+export const GITHUB_OAUTH_AUTHORIZE_URL = `https://${GITHUB_DOMAIN}/login/oauth/authorize`;
 
 /**
  * Initiate GitHub OAuth flow

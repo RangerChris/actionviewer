@@ -1,6 +1,5 @@
 import type { Workflow } from './types';
-
-const GITHUB_API = 'https://api.github.com';
+import { GITHUB_API_URL } from './oauth';
 
 const getHeaders = (token?: string) => {
   const headers: Record<string, string> = {
@@ -21,7 +20,7 @@ export const fetchWorkflows = async (
   repo: string,
   token?: string
 ): Promise<Workflow[]> => {
-  const url = `${GITHUB_API}/repos/${owner}/${repo}/actions/workflows`;
+  const url = `${GITHUB_API_URL}/repos/${owner}/${repo}/actions/workflows`;
   const response = await fetch(url, { headers: getHeaders(token) });
   
   if (!response.ok) {
@@ -40,7 +39,7 @@ export const triggerWorkflow = async (
   inputs?: Record<string, string>,
   token?: string
 ): Promise<void> => {
-  const url = `${GITHUB_API}/repos/${owner}/${repo}/actions/workflows/${workflowId}/dispatches`;
+  const url = `${GITHUB_API_URL}/repos/${owner}/${repo}/actions/workflows/${workflowId}/dispatches`;
   
   const body: any = {
     ref: ref || 'main',

@@ -1,0 +1,17 @@
+{
+  "name": "github-oauth-proxy",
+  "version": "1.0.0",
+  "description": "Simple OAuth proxy server for GitHub authentication",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "keywords": ["oauth", "github", "proxy"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^16.4.5"
+  }
+}

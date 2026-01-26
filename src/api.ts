@@ -7,7 +7,11 @@ const getHeaders = (token?: string) => {
     'Accept': 'application/vnd.github.v3+json',
   };
   if (token) {
-    headers['Authorization'] = `token ${token}`;
+    // OAuth tokens from GitHub OAuth flow start with 'gho_'
+    // Personal Access Tokens start with 'ghp_' or other prefixes
+    // OAuth tokens should use 'Bearer', PATs should use 'token'
+    const authPrefix = token.startsWith('gho_') ? 'Bearer' : 'token';
+    headers['Authorization'] = `${authPrefix} ${token}`;
   }
   return headers;
 };
@@ -32,15 +36,18 @@ export const triggerWorkflow = async (
   owner: string,
   repo: string,
   workflowId: number,
+  ref: string,
   inputs?: Record<string, string>,
   token?: string
 ): Promise<void> => {
   const url = `${GITHUB_API}/repos/${owner}/${repo}/actions/workflows/${workflowId}/dispatches`;
   
   const body: any = {
-    ref: 'main',
+    ref: ref || 'main',
   };
   
+  // Only include inputs if they exist and are not empty
+  // Some workflows don't accept inputs at all
   if (inputs && Object.keys(inputs).length > 0) {
     body.inputs = inputs;
   }
@@ -52,6 +59,8 @@ export const triggerWorkflow = async (
   });
   
   if (!response.ok) {
-    throw new Error(`Failed to trigger workflow: ${response.statusText}`);
+    const errorData = await response.json().catch(() => ({}));
+    const errorMessage = errorData.message || response.statusText;
+    throw new Error(`Failed to trigger workflow: ${errorMessage}`);
   }
 };

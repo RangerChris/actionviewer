@@ -5,6 +5,7 @@ import {
   FilterBar,
   WorkflowList,
   TriggerModal,
+  OAuthCallback,
 } from './components';
 import { fetchWorkflows, triggerWorkflow } from './api';
 import type { Workflow } from './types';
@@ -12,9 +13,11 @@ import {
   saveRepositoryData,
   loadRepositoryData,
   saveWorkflowInputs,
+  clearRepositoryData,
 } from './storage';
 
 function App() {
+  const [isOAuthCallback, setIsOAuthCallback] = useState(false);
   const [repoOwner, setRepoOwner] = useState('');
   const [repoName, setRepoName] = useState('');
   const [token, setToken] = useState('');
@@ -30,6 +33,13 @@ function App() {
     workflowName: '',
   });
   const [triggerLoading, setTriggerLoading] = useState(false);
+
+  // Check if this is an OAuth callback
+  useEffect(() => {
+    if (window.location.pathname === '/callback') {
+      setIsOAuthCallback(true);
+    }
+  }, []);
 
   // Load saved repository data on mount
   useEffect(() => {
@@ -106,17 +116,22 @@ function App() {
     });
   };
 
-  const handleConfirmTrigger = async (inputs: Record<string, string>) => {
+  const handleConfirmTrigger = async (inputs: Record<string, string>, ref?: string) => {
     setTriggerLoading(true);
     try {
-      // Save workflow inputs to local storage
-      saveWorkflowInputs(triggerModal.workflowName, inputs);
+      // Ensure ref is not in the inputs object
+      const cleanInputs = { ...inputs };
+      delete cleanInputs.ref;
+
+      // Save workflow inputs to local storage (without ref)
+      saveWorkflowInputs(triggerModal.workflowName, cleanInputs);
 
       await triggerWorkflow(
         repoOwner,
         repoName,
         triggerModal.workflowId,
-        inputs,
+        ref || 'main',
+        cleanInputs,
         token
       );
       setTriggerModal({ isOpen: false, workflowId: 0, workflowName: '' });
@@ -141,6 +156,59 @@ function App() {
     }
   };
 
+  const handleOAuthSuccess = (oauthToken: string) => {
+    setToken(oauthToken);
+    saveRepositoryData({
+      owner: repoOwner,
+      repo: repoName,
+      token: oauthToken,
+    });
+    setIsOAuthCallback(false);
+    // Show success message
+    const toastDiv = document.createElement('div');
+    toastDiv.className = 'toast toast-top toast-end';
+    toastDiv.innerHTML = `
+      <div class="alert alert-success">
+        <span>Successfully logged in with GitHub!</span>
+      </div>
+    `;
+    document.body.appendChild(toastDiv);
+    setTimeout(() => toastDiv.remove(), 3000);
+  };
+
+  const handleOAuthError = (errorMessage: string) => {
+    setError(errorMessage);
+    setIsOAuthCallback(false);
+  };
+
+  const handleLogout = () => {
+    setToken('');
+    setRepoOwner('');
+    setRepoName('');
+    setWorkflows([]);
+    setFilteredWorkflows([]);
+    setSearchTerm('');
+    setStatusFilter('');
+    setError(null);
+    clearRepositoryData();
+
+    // Show logout success message
+    const toastDiv = document.createElement('div');
+    toastDiv.className = 'toast toast-top toast-end';
+    toastDiv.innerHTML = `
+      <div class="alert alert-info">
+        <span>Logged out successfully</span>
+      </div>
+    `;
+    document.body.appendChild(toastDiv);
+    setTimeout(() => toastDiv.remove(), 3000);
+  };
+
+  // Handle OAuth callback
+  if (isOAuthCallback) {
+    return <OAuthCallback onSuccess={handleOAuthSuccess} onError={handleOAuthError} />;
+  }
+
   return (
     <div className="min-h-screen py-8 bg-base-100">
       <div className="container mx-auto px-4">
@@ -162,6 +230,8 @@ function App() {
         <RepositoryInput
           onSubmit={handleLoadWorkflows}
           loading={loading}
+          currentToken={token}
+          onLogout={handleLogout}
         />
 
         {/* Error Alert */}

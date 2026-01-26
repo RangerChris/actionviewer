@@ -4,7 +4,7 @@ import { loadWorkflowInputs } from '../storage';
 interface TriggerModalProps {
     isOpen: boolean;
     workflowName: string;
-    onTrigger: (inputs: Record<string, string>) => void;
+    onTrigger: (inputs: Record<string, string>, ref?: string) => void;
     onCancel: () => void;
     loading?: boolean;
 }
@@ -24,7 +24,10 @@ export function TriggerModal({
             // Try to load previously saved inputs for the same workflow
             const savedInputs = loadWorkflowInputs();
             if (savedInputs && savedInputs.workflowName === workflowName) {
-                setInputs(savedInputs.inputs);
+                // Remove ref from saved inputs (it should be stored as branch, not in inputs)
+                const cleanInputs = { ...savedInputs.inputs };
+                delete cleanInputs.ref;
+                setInputs(cleanInputs);
                 setBranch(savedInputs.inputs['ref'] || 'main');
             }
         } else {
@@ -34,8 +37,10 @@ export function TriggerModal({
     }, [isOpen, workflowName]);
 
     const handleSubmit = () => {
-        const allInputs = { ref: branch, ...inputs };
-        onTrigger(allInputs);
+        // Remove ref from inputs if it exists, and pass it separately
+        const cleanInputs = { ...inputs };
+        delete cleanInputs.ref;
+        onTrigger(cleanInputs, branch);
     };
 
     if (!isOpen) return null;

@@ -8,6 +8,7 @@ export interface Workflow {
   url: string;
   html_url: string;
   badge_url: string;
+  canTrigger?: boolean;
 }
 
 export interface RepositoryInfo {

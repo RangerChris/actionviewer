@@ -25,6 +25,7 @@ function App() {
   const [filteredWorkflows, setFilteredWorkflows] = useState<Workflow[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | ''>('asc');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [triggerModal, setTriggerModal] = useState({
@@ -70,8 +71,21 @@ function App() {
       );
     }
 
+    // Apply sorting
+    if (sortOrder) {
+      filtered = [...filtered].sort((a, b) => {
+        const nameA = a.name.toLowerCase();
+        const nameB = b.name.toLowerCase();
+        if (sortOrder === 'asc') {
+          return nameA.localeCompare(nameB);
+        } else {
+          return nameB.localeCompare(nameA);
+        }
+      });
+    }
+
     setFilteredWorkflows(filtered);
-  }, [workflows, searchTerm, statusFilter]);
+  }, [workflows, searchTerm, statusFilter, sortOrder]);
 
   const handleLoadWorkflows = async (
     owner: string,
@@ -270,7 +284,7 @@ function App() {
 
               {/* Search and Filter */}
               <SearchBar value={searchTerm} onChange={setSearchTerm} />
-              <FilterBar selectedStatus={statusFilter} onStatusChange={setStatusFilter} />
+              <FilterBar selectedStatus={statusFilter} onStatusChange={setStatusFilter} sortOrder={sortOrder} onSortChange={setSortOrder} />
             </div>
 
             {/* Workflow List */}

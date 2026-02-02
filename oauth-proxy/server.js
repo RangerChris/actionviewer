@@ -5,6 +5,12 @@ import 'dotenv/config';
 const PORT = process.env.PORT || 3001;
 const GITHUB_CLIENT_ID = process.env.GITHUB_CLIENT_ID;
 const GITHUB_CLIENT_SECRET = process.env.GITHUB_CLIENT_SECRET;
+const GITHUB_DOMAIN = process.env.GITHUB_DOMAIN || 'github.com';
+
+// Build OAuth token URL based on domain
+const getGitHubTokenUrl = () => {
+    return `https://${GITHUB_DOMAIN}/login/oauth/access_token`;
+};
 
 if (!GITHUB_CLIENT_ID || !GITHUB_CLIENT_SECRET) {
     console.error('❌ Missing required environment variables:');
@@ -55,7 +61,7 @@ const server = http.createServer(async (req, res) => {
                 }
 
                 // Exchange code for access token
-                const tokenResponse = await fetch('https://github.com/login/oauth/access_token', {
+                const tokenResponse = await fetch(getGitHubTokenUrl(), {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

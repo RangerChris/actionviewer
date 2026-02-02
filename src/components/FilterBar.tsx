@@ -26,7 +26,6 @@ export function FilterBar({ selectedStatus, onStatusChange, sortOrder, onSortCha
                 onChange={(e) => onSortChange(e.target.value as 'asc' | 'desc' | '')}
                 aria-label="Sort workflows by name"
             >
-                <option value="">Default</option>
                 <option value="asc">Name (A-Z)</option>
                 <option value="desc">Name (Z-A)</option>
             </select>

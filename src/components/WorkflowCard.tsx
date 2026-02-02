@@ -13,20 +13,20 @@ export function WorkflowCard({ workflow, onTrigger, loading }: WorkflowCardProps
     return (
         <div className="flex items-center gap-4 p-4 bg-base-100 border border-base-300 rounded-lg hover:bg-base-200 transition-colors">
             {/* Name */}
-            <div className="flex-1 min-w-0">
+            <div className="flex-[2] min-w-0">
                 <h3 className="font-semibold text-base truncate">{workflow.name}</h3>
             </div>
 
             {/* Status Badge */}
-            <div className={`badge ${stateColor}`}>{stateText}</div>
+            <div className={`badge ${stateColor} flex-shrink-0`}>{stateText}</div>
 
             {/* Path */}
-            <div className="w-64 min-w-0">
+            <div className="flex-[3] min-w-0">
                 <p className="text-sm text-base-content/60 font-mono truncate">{workflow.path}</p>
             </div>
 
             {/* Action Buttons */}
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-shrink-0">
                 <button
                     className="btn btn-primary btn-sm"
                     onClick={() => onTrigger(workflow.id, workflow.name)}

@@ -95,7 +95,7 @@ export function RepositoryInput({ onSubmit, loading, currentToken, onLogout }: R
                             disabled={loading}
                             title={showToken ? 'Hide token' : 'Show token'}
                         >
-                            {showToken ? '🙈' : '👁'}
+                            {showToken ? '🙉' : '🙈'}
                         </button>
                     </div>
                     <label className="label">

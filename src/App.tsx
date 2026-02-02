@@ -133,12 +133,15 @@ function App() {
   const handleConfirmTrigger = async (inputs: Record<string, string>, ref?: string) => {
     setTriggerLoading(true);
     try {
-      // Ensure ref is not in the inputs object
+      // Prepare inputs for saving - include ref
+      const inputsToSave = { ...inputs, ref: ref || 'main' };
+
+      // Save workflow inputs to local storage (with ref included)
+      saveWorkflowInputs(triggerModal.workflowName, inputsToSave);
+
+      // Prepare clean inputs for API call (without ref)
       const cleanInputs = { ...inputs };
       delete cleanInputs.ref;
-
-      // Save workflow inputs to local storage (without ref)
-      saveWorkflowInputs(triggerModal.workflowName, cleanInputs);
 
       await triggerWorkflow(
         repoOwner,

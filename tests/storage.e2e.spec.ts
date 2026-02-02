@@ -30,6 +30,26 @@ test.describe('Local Storage - Repository Data', () => {
       await route.continue();
     });
 
+    // Mock workflow file content to include workflow_dispatch
+    await page.route('**/contents/.github/workflows/ci.yml', async (route: Route) => {
+      const workflowContent = `name: CI
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3`;
+      const encoded = Buffer.from(workflowContent).toString('base64');
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ content: encoded, encoding: 'base64' })
+      });
+    });
+
     await page.route('**/actions/workflows/123/dispatches', async (route: Route) => {
       await route.fulfill({ status: 204, contentType: 'application/json', body: '' });
     });
@@ -217,6 +237,26 @@ test.describe('Local Storage - Workflow Inputs', () => {
       await route.continue();
     });
 
+    // Mock workflow file content to include workflow_dispatch
+    await page.route('**/contents/.github/workflows/ci.yml', async (route: Route) => {
+      const workflowContent = `name: CI
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3`;
+      const encoded = Buffer.from(workflowContent).toString('base64');
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ content: encoded, encoding: 'base64' })
+      });
+    });
+
     await page.route('**/actions/workflows/123/dispatches', async (route: Route) => {
       await route.fulfill({ status: 204, contentType: 'application/json', body: '' });
     });
@@ -232,9 +272,7 @@ test.describe('Local Storage - Workflow Inputs', () => {
     await expect(page.getByRole('heading', { name: 'CI' })).toBeVisible();
 
     // Trigger workflow with custom branch
-    const activeCard = page.locator('.card', { hasText: 'CI' });
-    await activeCard.hover();
-    await activeCard.getByRole('button', { name: 'Trigger' }).click();
+    await page.getByRole('button', { name: 'Trigger' }).click();
 
     const modal = page.getByRole('dialog');
     await expect(modal).toContainText('Trigger: CI');
@@ -269,9 +307,7 @@ test.describe('Local Storage - Workflow Inputs', () => {
     await expect(page.getByRole('heading', { name: 'CI' })).toBeVisible();
 
     // First trigger with custom branch
-    let activeCard = page.locator('.card', { hasText: 'CI' });
-    await activeCard.hover();
-    await activeCard.getByRole('button', { name: 'Trigger' }).click();
+    await page.getByRole('button', { name: 'Trigger' }).click();
 
     let modal = page.getByRole('dialog');
     await expect(modal).toContainText('Trigger: CI');
@@ -281,9 +317,7 @@ test.describe('Local Storage - Workflow Inputs', () => {
     await expect(page.getByText('Workflow triggered successfully!')).toBeVisible();
 
     // Trigger the same workflow again
-    activeCard = page.locator('.card', { hasText: 'CI' });
-    await activeCard.hover();
-    await activeCard.getByRole('button', { name: 'Trigger' }).click();
+    await page.getByRole('button', { name: 'Trigger' }).click();
 
     modal = page.getByRole('dialog');
     // Verify the branch input is pre-filled with the saved value
@@ -302,9 +336,7 @@ test.describe('Local Storage - Workflow Inputs', () => {
 
     const beforeTrigger = Date.now();
 
-    const activeCard = page.locator('.card', { hasText: 'CI' });
-    await activeCard.hover();
-    await activeCard.getByRole('button', { name: 'Trigger' }).click();
+    await page.getByRole('button', { name: 'Trigger' }).click();
 
     const modal = page.getByRole('dialog');
     await modal.getByPlaceholder('main').fill('main');
@@ -337,9 +369,7 @@ test.describe('Local Storage - Workflow Inputs', () => {
     await expect(page.getByRole('heading', { name: 'CI' })).toBeVisible();
 
     // First trigger and save inputs
-    let activeCard = page.locator('.card', { hasText: 'CI' });
-    await activeCard.hover();
-    await activeCard.getByRole('button', { name: 'Trigger' }).click();
+    await page.getByRole('button', { name: 'Trigger' }).click();
 
     let modal = page.getByRole('dialog');
     await modal.getByPlaceholder('main').fill('saved-branch');
@@ -347,9 +377,7 @@ test.describe('Local Storage - Workflow Inputs', () => {
     await expect(page.getByText('Workflow triggered successfully!')).toBeVisible();
 
     // Open modal again and verify saved data loads
-    activeCard = page.locator('.card', { hasText: 'CI' });
-    await activeCard.hover();
-    await activeCard.getByRole('button', { name: 'Trigger' }).click();
+    await page.getByRole('button', { name: 'Trigger' }).click();
 
     modal = page.getByRole('dialog');
     const branchInput = modal.getByPlaceholder('main');
@@ -386,6 +414,26 @@ test.describe('Local Storage - Edge Cases', () => {
         return;
       }
       await route.continue();
+    });
+
+    // Mock workflow file content to include workflow_dispatch
+    await page.route('**/contents/.github/workflows/ci.yml', async (route: Route) => {
+      const workflowContent = `name: CI
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3`;
+      const encoded = Buffer.from(workflowContent).toString('base64');
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ content: encoded, encoding: 'base64' })
+      });
     });
 
     await page.route('**/actions/workflows/123/dispatches', async (route: Route) => {
@@ -439,9 +487,7 @@ test.describe('Local Storage - Edge Cases', () => {
     await expect(page.getByRole('heading', { name: 'CI' })).toBeVisible();
 
     // Trigger with special characters in branch
-    const activeCard = page.locator('.card', { hasText: 'CI' });
-    await activeCard.hover();
-    await activeCard.getByRole('button', { name: 'Trigger' }).click();
+    await page.getByRole('button', { name: 'Trigger' }).click();
 
     const modal = page.getByRole('dialog');
     await modal.getByPlaceholder('main').fill('feature/test-123_abc');
@@ -472,9 +518,7 @@ test.describe('Local Storage - Edge Cases', () => {
     await expect(page.getByRole('heading', { name: 'CI' })).toBeVisible();
 
     // Trigger workflow in first repo
-    let activeCard = page.locator('.card', { hasText: 'CI' });
-    await activeCard.hover();
-    await activeCard.getByRole('button', { name: 'Trigger' }).click();
+    await page.getByRole('button', { name: 'Trigger' }).click();
 
     let modal = page.getByRole('dialog');
     await modal.getByPlaceholder('main').fill('branch1');

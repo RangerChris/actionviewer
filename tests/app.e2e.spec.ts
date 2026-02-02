@@ -36,6 +36,45 @@ test.beforeEach(async ({ page }: { page: Page }) => {
     await route.continue();
   });
 
+  // Mock workflow file content to include workflow_dispatch
+  await page.route('**/contents/.github/workflows/ci.yml', async (route: Route) => {
+    const workflowContent = `name: CI
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3`;
+    const encoded = Buffer.from(workflowContent).toString('base64');
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ content: encoded, encoding: 'base64' })
+    });
+  });
+
+  await page.route('**/contents/.github/workflows/docs.yml', async (route: Route) => {
+    const workflowContent = `name: Docs
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3`;
+    const encoded = Buffer.from(workflowContent).toString('base64');
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ content: encoded, encoding: 'base64' })
+    });
+  });
+
   await page.route('**/actions/workflows/123/dispatches', async (route: Route) => {
     await route.fulfill({ status: 204, contentType: 'application/json', body: '' });
   });
@@ -67,9 +106,8 @@ test('load, filter, search, and trigger a workflow', async ({ page }: { page: Pa
   await page.getByPlaceholder('Search workflows...').fill('CI');
   await page.getByLabel('Filter workflows by status').selectOption('active');
 
-  const activeCard = page.locator('.card', { hasText: 'CI' });
-  await activeCard.hover();
-  await activeCard.getByRole('button', { name: 'Trigger' }).click();
+  // Click trigger button for the CI workflow
+  await page.getByRole('button', { name: 'Trigger' }).click();
 
   const modal = page.getByRole('dialog');
   await expect(modal).toContainText('Trigger: CI');

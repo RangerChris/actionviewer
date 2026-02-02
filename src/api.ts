@@ -15,6 +15,36 @@ const getHeaders = (token?: string) => {
   return headers;
 };
 
+const checkWorkflowDispatch = async (
+  owner: string,
+  repo: string,
+  path: string,
+  token?: string
+): Promise<boolean> => {
+  // Skip checking for dynamic workflows (they don't have actual files)
+  if (path.startsWith('dynamic/')) {
+    return false;
+  }
+  
+  try {
+    const url = `${GITHUB_API_URL}/repos/${owner}/${repo}/contents/${path}`;
+    const response = await fetch(url, { headers: getHeaders(token) });
+    
+    if (!response.ok) {
+      return false;
+    }
+    
+    const data = await response.json();
+    const content = atob(data.content);
+    
+    // Check if workflow_dispatch is in the 'on:' section
+    // This is a simple pattern match - could be more sophisticated
+    return content.includes('workflow_dispatch');
+  } catch {
+    return false;
+  }
+};
+
 export const fetchWorkflows = async (
   owner: string,
   repo: string,
@@ -28,7 +58,17 @@ export const fetchWorkflows = async (
   }
   
   const data = await response.json();
-  return data.workflows || [];
+  const workflows: Workflow[] = data.workflows || [];
+  
+  // Check each workflow for workflow_dispatch trigger
+  const workflowsWithTriggerInfo = await Promise.all(
+    workflows.map(async (workflow) => {
+      const canTrigger = await checkWorkflowDispatch(owner, repo, workflow.path, token);
+      return { ...workflow, canTrigger };
+    })
+  );
+  
+  return workflowsWithTriggerInfo;
 };
 
 export const triggerWorkflow = async (

@@ -27,20 +27,22 @@ export function WorkflowCard({ workflow, onTrigger, loading }: WorkflowCardProps
 
             {/* Action Buttons */}
             <div className="flex gap-2 flex-shrink-0">
-                <button
-                    className="btn btn-primary btn-sm"
-                    onClick={() => onTrigger(workflow.id, workflow.name)}
-                    disabled={loading || workflow.state !== 'active'}
-                >
-                    {loading ? (
-                        <>
-                            <span className="loading loading-spinner loading-xs"></span>
-                            Triggering...
-                        </>
-                    ) : (
-                        'Trigger'
-                    )}
-                </button>
+                <div className="tooltip" data-tip={workflow.canTrigger === false ? "Workflow cannot be manually triggered (missing workflow_dispatch)" : ""}>
+                    <button
+                        className="btn btn-primary btn-sm"
+                        onClick={() => onTrigger(workflow.id, workflow.name)}
+                        disabled={loading || workflow.state !== 'active' || workflow.canTrigger === false}
+                    >
+                        {loading ? (
+                            <>
+                                <span className="loading loading-spinner loading-xs"></span>
+                                Triggering...
+                            </>
+                        ) : (
+                            'Trigger'
+                        )}
+                    </button>
+                </div>
                 <a
                     href={workflow.html_url}
                     target="_blank"

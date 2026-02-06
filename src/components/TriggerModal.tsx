@@ -17,7 +17,7 @@ export function TriggerModal({
     loading,
 }: TriggerModalProps) {
     const [inputs, setInputs] = useState<Record<string, string>>({});
-    const [branch, setBranch] = useState('main');
+    const [branch, setBranch] = useState('dev');
 
     useEffect(() => {
         if (isOpen) {
@@ -28,11 +28,11 @@ export function TriggerModal({
                 const cleanInputs = { ...savedInputs.inputs };
                 delete cleanInputs.ref;
                 setInputs(cleanInputs);
-                setBranch(savedInputs.inputs['ref'] || 'main');
+                setBranch(savedInputs.inputs['ref'] || 'dev');
             }
         } else {
             setInputs({});
-            setBranch('main');
+            setBranch('dev');
         }
     }, [isOpen, workflowName]);
 
@@ -56,7 +56,7 @@ export function TriggerModal({
                     </label>
                     <input
                         type="text"
-                        placeholder="main"
+                        placeholder="dev"
                         className="input input-bordered bg-base-100 text-base-content"
                         value={branch}
                         onChange={(e) => setBranch(e.target.value)}

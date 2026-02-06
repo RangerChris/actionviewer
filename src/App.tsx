@@ -108,7 +108,7 @@ function App() {
     });
 
     try {
-      const data = await fetchWorkflows(owner, repo, loadToken);
+      const data = await fetchWorkflows(owner, repo, loadToken, 'dev');
       setWorkflows(data);
     } catch (err) {
       setError(
@@ -134,7 +134,7 @@ function App() {
     setTriggerLoading(true);
     try {
       // Prepare inputs for saving - include ref
-      const inputsToSave = { ...inputs, ref: ref || 'main' };
+      const inputsToSave = { ...inputs, ref: ref || 'dev' };
 
       // Save workflow inputs to local storage (with ref included)
       saveWorkflowInputs(triggerModal.workflowName, inputsToSave);
@@ -147,7 +147,7 @@ function App() {
         repoOwner,
         repoName,
         triggerModal.workflowId,
-        ref || 'main',
+        ref || 'dev',
         cleanInputs,
         token
       );

@@ -19,7 +19,8 @@ const checkWorkflowDispatch = async (
   owner: string,
   repo: string,
   path: string,
-  token?: string
+  token?: string,
+  branch: string = 'dev'
 ): Promise<boolean> => {
   // Skip checking for dynamic workflows (they don't have actual files)
   if (path.startsWith('dynamic/')) {
@@ -27,7 +28,7 @@ const checkWorkflowDispatch = async (
   }
   
   try {
-    const url = `${GITHUB_API_URL}/repos/${owner}/${repo}/contents/${path}`;
+    const url = `${GITHUB_API_URL}/repos/${owner}/${repo}/contents/${path}?ref=${branch}`;
     const response = await fetch(url, { headers: getHeaders(token) });
     
     if (!response.ok) {
@@ -48,9 +49,10 @@ const checkWorkflowDispatch = async (
 export const fetchWorkflows = async (
   owner: string,
   repo: string,
-  token?: string
+  token?: string,
+  branch: string = 'dev'
 ): Promise<Workflow[]> => {
-  const url = `${GITHUB_API_URL}/repos/${owner}/${repo}/actions/workflows`;
+  const url = `${GITHUB_API_URL}/repos/${owner}/${repo}/actions/workflows?ref=${branch}&per_page=100`;
   const response = await fetch(url, { headers: getHeaders(token) });
   
   if (!response.ok) {
@@ -63,7 +65,7 @@ export const fetchWorkflows = async (
   // Check each workflow for workflow_dispatch trigger
   const workflowsWithTriggerInfo = await Promise.all(
     workflows.map(async (workflow) => {
-      const canTrigger = await checkWorkflowDispatch(owner, repo, workflow.path, token);
+      const canTrigger = await checkWorkflowDispatch(owner, repo, workflow.path, token, branch);
       return { ...workflow, canTrigger };
     })
   );
@@ -82,7 +84,7 @@ export const triggerWorkflow = async (
   const url = `${GITHUB_API_URL}/repos/${owner}/${repo}/actions/workflows/${workflowId}/dispatches`;
   
   const body: any = {
-    ref: ref || 'main',
+    ref: ref || 'dev',
   };
   
   // Only include inputs if they exist and are not empty

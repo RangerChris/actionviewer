@@ -51,19 +51,36 @@ export const fetchWorkflows = async (
   token?: string,
   branch: string = 'dev'
 ): Promise<Workflow[]> => {
-  const url = `${GITHUB_API_URL}/repos/${owner}/${repo}/actions/workflows?ref=${branch}&per_page=100`;
-  const response = await fetch(url, { headers: getHeaders(token) });
-  
-  if (!response.ok) {
-    throw new Error(`Failed to fetch workflows: ${response.statusText}`);
+  let allWorkflows: Workflow[] = [];
+  let page = 1;
+  let hasMore = true;
+
+  while (hasMore) {
+    const url = `${GITHUB_API_URL}/repos/${owner}/${repo}/actions/workflows?ref=${branch}&per_page=100&page=${page}`;
+    const response = await fetch(url, { headers: getHeaders(token) });
+    
+    if (!response.ok) {
+      throw new Error(`Failed to fetch workflows: ${response.statusText}`);
+    }
+    
+    const data = await response.json();
+    const workflows: Workflow[] = data.workflows || [];
+    
+    if (workflows.length === 0) {
+      hasMore = false;
+    } else {
+      allWorkflows = allWorkflows.concat(workflows);
+      page++;
+      // Stop if we've fetched enough or reached the end
+      if (workflows.length < 100) {
+        hasMore = false;
+      }
+    }
   }
-  
-  const data = await response.json();
-  const workflows: Workflow[] = data.workflows || [];
   
   // Check each workflow for workflow_dispatch trigger
   const workflowsWithTriggerInfo = await Promise.all(
-    workflows.map(async (workflow) => {
+    allWorkflows.map(async (workflow) => {
       const canTrigger = await checkWorkflowDispatch(owner, repo, workflow.path, token, branch);
       return { ...workflow, canTrigger };
     })

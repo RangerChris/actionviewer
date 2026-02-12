@@ -105,3 +105,23 @@ export const triggerWorkflow = async (
     throw new Error(`Failed to trigger workflow: ${errorMessage}`);
   }
 };
+
+export const fetchRepositories = async (
+  owner: string,
+  token?: string
+): Promise<string[]> => {
+  const url = `${GITHUB_API_URL}/users/${owner}/repos?per_page=100&sort=updated&type=all`;
+  const response = await fetch(url, { headers: getHeaders(token) });
+  
+  if (!response.ok) {
+    throw new Error(`Failed to fetch repositories: ${response.statusText}`);
+  }
+  
+  const data = await response.json();
+  const repos: Array<{ name: string }> = Array.isArray(data) ? data : [];
+  
+  // Extract names and sort alphabetically
+  return repos
+    .map((repo) => repo.name)
+    .sort((a, b) => a.localeCompare(b));
+};

@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { loadRepositoryData, saveRepositoryData } from '../storage';
 import { initiateGitHubLogin } from '../oauth';
+import { fetchRepositories } from '../api';
 
 interface RepositoryInputProps {
     onSubmit: (owner: string, repo: string, token?: string) => void;
@@ -15,6 +16,10 @@ export function RepositoryInput({ onSubmit, loading, currentToken, onLogout }: R
     const [token, setToken] = useState('');
     const [showToken, setShowToken] = useState(false);
     const [isCollapsed, setIsCollapsed] = useState(false);
+    const [repositories, setRepositories] = useState<string[]>([]);
+    const [filteredRepositories, setFilteredRepositories] = useState<string[]>([]);
+    const [loadingRepos, setLoadingRepos] = useState(false);
+    const repoInputRef = useRef<HTMLInputElement>(null);
 
     // Load saved repository data on mount
     useEffect(() => {
@@ -33,6 +38,39 @@ export function RepositoryInput({ onSubmit, loading, currentToken, onLogout }: R
         }
     }, [currentToken]);
 
+    // Filter repositories based on repo input
+    useEffect(() => {
+        if (repositories.length > 0) {
+            const filtered = repositories.filter((r) =>
+                r.toLowerCase().includes(repo.toLowerCase())
+            );
+            setFilteredRepositories(filtered);
+        }
+    }, [repo, repositories]);
+
+    const handleLoadRepositories = async () => {
+        if (!owner.trim()) return;
+
+        setLoadingRepos(true);
+        try {
+            const repos = await fetchRepositories(owner, token || undefined);
+            setRepositories(repos);
+            setFilteredRepositories(repos);
+        } catch (err) {
+            console.error('Failed to load repositories:', err);
+            setRepositories([]);
+            setFilteredRepositories([]);
+        } finally {
+            setLoadingRepos(false);
+        }
+    };
+
+    const handleSelectRepository = (selectedRepo: string) => {
+        setRepo(selectedRepo);
+        setRepositories([]);
+        setFilteredRepositories([]);
+    };
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (owner && repo) {
@@ -44,7 +82,7 @@ export function RepositoryInput({ onSubmit, loading, currentToken, onLogout }: R
 
     return (
         <div className="mb-6">
-            <div className="collapse collapse-arrow bg-base-300 shadow-lg">
+            <div className="collapse collapse-arrow bg-base-300 shadow-lg overflow-visible">
                 <input
                     type="checkbox"
                     checked={!isCollapsed}
@@ -53,7 +91,7 @@ export function RepositoryInput({ onSubmit, loading, currentToken, onLogout }: R
                 <div className="collapse-title text-xl font-medium text-base-content">
                     Add Repository
                 </div>
-                <div className="collapse-content">
+                <div className="collapse-content overflow-visible">
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div className="grid grid-cols-2 gap-4">
                             <div>
@@ -73,14 +111,62 @@ export function RepositoryInput({ onSubmit, loading, currentToken, onLogout }: R
                                 <label className="label">
                                     <span className="label-text">Repository</span>
                                 </label>
-                                <input
-                                    type="text"
-                                    placeholder="repo-name"
-                                    className="input input-bordered w-full bg-base-100 text-base-content"
-                                    value={repo}
-                                    onChange={(e) => setRepo(e.target.value)}
-                                    disabled={loading}
-                                />
+                                <div className="flex gap-2 relative z-20" style={{ position: 'relative' }}>
+                                    <input
+                                        ref={repoInputRef}
+                                        type="text"
+                                        placeholder="repo-name"
+                                        className="input input-bordered w-full flex-1 bg-base-100 text-base-content"
+                                        value={repo}
+                                        onChange={(e) => setRepo(e.target.value)}
+                                        disabled={loading}
+                                    />
+                                    {owner && (
+                                        <>
+                                            <button
+                                                type="button"
+                                                className="btn btn-square btn-outline"
+                                                onClick={handleLoadRepositories}
+                                                disabled={loading || loadingRepos}
+                                                title="Load repositories from GitHub"
+                                            >
+                                                {loadingRepos ? (
+                                                    <span className="loading loading-spinner loading-sm"></span>
+                                                ) : (
+                                                    '📦'
+                                                )}
+                                            </button>
+                                            {filteredRepositories.length > 0 && (
+                                                <div style={{
+                                                    position: 'fixed',
+                                                    zIndex: 999999,
+                                                    backgroundColor: '#000',
+                                                    color: '#fff',
+                                                    border: '2px solid hsl(var(--bc) / 0.5)',
+                                                    borderRadius: '0.5rem',
+                                                    padding: '0.5rem',
+                                                    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.3)',
+                                                    width: repoInputRef.current ? `${repoInputRef.current.offsetWidth}px` : '13rem',
+                                                    maxHeight: '15rem',
+                                                    overflowY: 'auto',
+                                                    top: repoInputRef.current ? (repoInputRef.current.getBoundingClientRect().bottom + window.scrollY) : 'auto',
+                                                    left: repoInputRef.current ? (repoInputRef.current.getBoundingClientRect().left + window.scrollX) : 'auto',
+                                                }} className="space-y-1">
+                                                    {filteredRepositories.map((r) => (
+                                                        <button
+                                                            key={r}
+                                                            type="button"
+                                                            className="btn btn-ghost btn-sm justify-start text-left w-full"
+                                                            onClick={() => handleSelectRepository(r)}
+                                                        >
+                                                            {r}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </>
+                                    )}
+                                </div>
                             </div>
                         </div>
 

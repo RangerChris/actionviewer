@@ -6,9 +6,8 @@ const getHeaders = (token?: string) => {
     'Accept': 'application/vnd.github.v3+json',
   };
   if (token) {
-    // OAuth tokens from GitHub OAuth flow start with 'gho_'
-    // Personal Access Tokens start with 'ghp_' or other prefixes
-    // OAuth tokens should use 'Bearer', PATs should use 'token'
+    // OAuth tokens (gho_*) and GitHub App tokens should use 'Bearer'
+    // All other tokens (ghp_*, ghs_*, ghu_*) should use 'token'
     const authPrefix = token.startsWith('gho_') ? 'Bearer' : 'token';
     headers['Authorization'] = `${authPrefix} ${token}`;
   }
@@ -110,18 +109,34 @@ export const fetchRepositories = async (
   owner: string,
   token?: string
 ): Promise<string[]> => {
-  const url = `${GITHUB_API_URL}/users/${owner}/repos?per_page=100&sort=updated&type=all`;
-  const response = await fetch(url, { headers: getHeaders(token) });
-  
-  if (!response.ok) {
-    throw new Error(`Failed to fetch repositories: ${response.statusText}`);
+  const usersUrl = `${GITHUB_API_URL}/users/${owner}/repos?per_page=100&sort=updated&type=all`;
+  const orgsUrl = `${GITHUB_API_URL}/orgs/${owner}/repos?per_page=100&sort=updated&type=all`;
+
+  const fetchRepoList = async (url: string) => {
+    const res = await fetch(url, { headers: getHeaders(token) });
+    if (!res.ok) return { ok: false, status: res.status, statusText: res.statusText, data: null as any };
+    const json = await res.json();
+    return { ok: true, status: res.status, statusText: res.statusText, data: json };
+  };
+
+  // Try the users endpoint first
+  let result = await fetchRepoList(usersUrl);
+
+  // If users endpoint returns empty array, it might be an org - try the orgs endpoint
+  if (result.ok && Array.isArray(result.data) && result.data.length === 0) {
+    result = await fetchRepoList(orgsUrl);
+  } else if (!result.ok) {
+    // If users endpoint fails, try orgs endpoint
+    result = await fetchRepoList(orgsUrl);
   }
-  
-  const data = await response.json();
+
+  if (!result.ok) {
+    throw new Error(`Failed to fetch repositories: ${result.statusText}`);
+  }
+
+  const data = result.data;
   const repos: Array<{ name: string }> = Array.isArray(data) ? data : [];
-  
+
   // Extract names and sort alphabetically
-  return repos
-    .map((repo) => repo.name)
-    .sort((a, b) => a.localeCompare(b));
+  return repos.map((repo) => repo.name).sort((a, b) => a.localeCompare(b));
 };

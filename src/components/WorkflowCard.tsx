@@ -10,6 +10,15 @@ export function WorkflowCard({ workflow, onTrigger, loading }: WorkflowCardProps
     const stateColor = workflow.state === 'active' ? 'badge-success' : 'badge-warning';
     const stateText = workflow.state === 'active' ? 'Active' : 'Disabled';
 
+    // Get tooltip message explaining workflow status
+    const getTooltipMessage = (): string => {
+        if (workflow.state !== 'active') return 'Workflow is disabled';
+        if (workflow.canTrigger === false) return 'Workflow might not work due to missing permissions or configuration';
+        return '';
+    };
+
+    const tooltipMessage = getTooltipMessage();
+
     return (
         <div className="flex items-center gap-4 p-4 bg-base-100 border border-base-300 rounded-lg hover:bg-base-200 transition-colors">
             {/* Name */}
@@ -27,11 +36,11 @@ export function WorkflowCard({ workflow, onTrigger, loading }: WorkflowCardProps
 
             {/* Action Buttons */}
             <div className="flex gap-2 flex-shrink-0">
-                <div className="tooltip" data-tip={workflow.canTrigger === false ? "Workflow cannot be manually triggered (missing workflow_dispatch)" : ""}>
+                <div className="tooltip" data-tip={tooltipMessage}>
                     <button
                         className="btn btn-primary btn-sm"
                         onClick={() => onTrigger(workflow.id, workflow.name)}
-                        disabled={loading || workflow.state !== 'active' || workflow.canTrigger === false}
+                        disabled={loading}
                     >
                         {loading ? (
                             <>

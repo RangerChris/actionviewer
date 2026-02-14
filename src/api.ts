@@ -34,8 +34,8 @@ const checkWorkflowDispatch = async (
       return false;
     }
     
-    const data = await response.json();
-    const content = atob(data.content);
+    const data = (await response.json()) as { content?: string };
+    const content = data.content ? atob(data.content) : '';
     
     // Check if workflow_dispatch is in the 'on:' section
     // This is a simple pattern match - could be more sophisticated
@@ -63,7 +63,7 @@ export const fetchWorkflows = async (
       throw new Error(`Failed to fetch workflows: ${response.statusText}`);
     }
     
-    const data = await response.json();
+    const data = (await response.json()) as { workflows?: Workflow[] };
     const workflows: Workflow[] = data.workflows || [];
     
     if (workflows.length === 0) {
@@ -99,7 +99,7 @@ export const triggerWorkflow = async (
 ): Promise<void> => {
   const url = `${GITHUB_API_URL}/repos/${owner}/${repo}/actions/workflows/${workflowId}/dispatches`;
   
-  const body: any = {
+  const body: { ref: string; inputs?: Record<string, string> } = {
     ref: ref || 'dev',
   };
   
@@ -118,7 +118,7 @@ export const triggerWorkflow = async (
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
     const errorMessage = errorData.message || response.statusText;
-    throw new Error(`Failed to trigger workflow: ${errorMessage}`);
+      throw new Error(`Failed to trigger workflow: ${errorMessage}`);
   }
 };
 
@@ -131,8 +131,8 @@ export const fetchRepositories = async (
 
   const fetchRepoList = async (url: string) => {
     const res = await fetch(url, { headers: getHeaders(token) });
-    if (!res.ok) return { ok: false, status: res.status, statusText: res.statusText, data: null as any };
-    const json = await res.json();
+    if (!res.ok) return { ok: false, status: res.status, statusText: res.statusText, data: null as unknown };
+    const json = (await res.json()) as unknown;
     return { ok: true, status: res.status, statusText: res.statusText, data: json };
   };
 

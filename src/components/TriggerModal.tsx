@@ -1,8 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { loadWorkflowInputs } from '../storage';
 
 interface TriggerModalProps {
-    isOpen: boolean;
     workflowName: string;
     onTrigger: (inputs: Record<string, string>, ref?: string) => void;
     onCancel: () => void;
@@ -10,40 +9,25 @@ interface TriggerModalProps {
 }
 
 export function TriggerModal({
-    isOpen,
     workflowName,
     onTrigger,
     onCancel,
     loading,
 }: TriggerModalProps) {
-    const [inputs, setInputs] = useState<Record<string, string>>({});
-    const [branch, setBranch] = useState('dev');
-
-    useEffect(() => {
-        if (isOpen) {
-            // Try to load previously saved inputs for the same workflow
-            const savedInputs = loadWorkflowInputs();
-            if (savedInputs && savedInputs.workflowName === workflowName) {
-                // Remove ref from saved inputs (it should be stored as branch, not in inputs)
-                const cleanInputs = { ...savedInputs.inputs };
-                delete cleanInputs.ref;
-                setInputs(cleanInputs);
-                setBranch(savedInputs.inputs['ref'] || 'dev');
-            }
-        } else {
-            setInputs({});
-            setBranch('dev');
+    const getInitialBranch = () => {
+        const savedInputs = loadWorkflowInputs();
+        if (savedInputs && savedInputs.workflowName === workflowName) {
+            return savedInputs.inputs['ref'] || 'dev';
         }
-    }, [isOpen, workflowName]);
+        return 'dev';
+    };
+
+    const [branch, setBranch] = useState(getInitialBranch());
 
     const handleSubmit = () => {
         // Remove ref from inputs if it exists, and pass it separately
-        const cleanInputs = { ...inputs };
-        delete cleanInputs.ref;
-        onTrigger(cleanInputs, branch);
+        onTrigger({}, branch);
     };
-
-    if (!isOpen) return null;
 
     return (
         <div className="modal modal-open">

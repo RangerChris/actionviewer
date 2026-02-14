@@ -308,15 +308,16 @@ function App() {
       </div>
 
       {/* Trigger Modal */}
-      <TriggerModal
-        isOpen={triggerModal.isOpen}
-        workflowName={triggerModal.workflowName}
-        onTrigger={handleConfirmTrigger}
-        onCancel={() =>
-          setTriggerModal({ isOpen: false, workflowId: 0, workflowName: '' })
-        }
-        loading={triggerLoading}
-      />
+      {triggerModal.isOpen && (
+        <TriggerModal
+          workflowName={triggerModal.workflowName}
+          onTrigger={handleConfirmTrigger}
+          onCancel={() =>
+            setTriggerModal({ isOpen: false, workflowId: 0, workflowName: '' })
+          }
+          loading={triggerLoading}
+        />
+      )}
     </div>
   );
 }

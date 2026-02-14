@@ -118,7 +118,7 @@ test('load, sort, filter, and search workflows', async ({ page }: { page: Page }
 
 test('trigger workflow, save inputs, and logout', async ({ page }: { page: Page }) => {
   let dispatchHeaders: Record<string, string> = {};
-  let dispatchBody: any = null;
+  let dispatchBody: { ref: string; inputs?: Record<string, string> } | null = null;
 
   await page.route('**/actions/workflows**', async (route: Route) => {
     const requestUrl = new URL(route.request().url());
@@ -143,7 +143,10 @@ test('trigger workflow, save inputs, and logout', async ({ page }: { page: Page 
 
   await page.route('**/actions/workflows/101/dispatches', async (route: Route) => {
     dispatchHeaders = route.request().headers();
-    dispatchBody = await route.request().postDataJSON();
+    dispatchBody = (await route.request().postDataJSON()) as {
+      ref: string;
+      inputs?: Record<string, string>;
+    };
     await route.fulfill({ status: 204, contentType: 'application/json', body: '' });
   });
 

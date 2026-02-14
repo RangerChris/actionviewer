@@ -36,7 +36,7 @@ export function RepositoryInput({ onSubmit, loading, currentToken, onLogout }: R
         if (currentToken && currentToken !== token) {
             setToken(currentToken);
         }
-    }, [currentToken]);
+    }, [currentToken, token]);
 
     // Filter repositories based on repo input
     useEffect(() => {

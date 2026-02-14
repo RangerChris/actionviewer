@@ -31,3 +31,4 @@ dist-ssr
 .playwright-mcp/
 playwright-report/
 test-results/
+playwright-report/

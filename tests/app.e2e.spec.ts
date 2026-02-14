@@ -48,7 +48,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3`;
 
-const base64 = (value: string) => Buffer.from(value).toString('base64');
+const base64 = (value: string) => btoa(value);
 
 const mockWorkflowRoutes = async (page: Page) => {
   await page.route('**/actions/workflows**', async (route: Route) => {

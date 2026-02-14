@@ -89,7 +89,7 @@ export function RepositoryInput({ onSubmit, loading, currentToken, onLogout }: R
                     onChange={(e) => setIsCollapsed(!e.target.checked)}
                 />
                 <div className="collapse-title text-xl font-medium text-base-content">
-                    Add Repository
+                    Find Repository
                 </div>
                 <div className="collapse-content overflow-visible">
                     <form onSubmit={handleSubmit} className="space-y-4">
